@@ -16,12 +16,13 @@ fn main() {
     esp_idf_svc::sys::link_patches();
     // Bind the log crate to the ESP Logging facilities
     esp_idf_svc::log::EspLogger::initialize_default();
-
-    readings = reading();
-    calculate_speed = calculate(readings[0], readings[1]);
-    control(calculate_speed[0], calculate_speed[1]);
-
-    FreeRtos::delay_ms(12);
+    loop {
+        readings = reading();
+        calculate_speed = calculate(readings[0], readings[1]);
+        control(calculate_speed[0], calculate_speed[1]);
+    
+        FreeRtos::delay_ms(12);    
+    }
 }
 
 fn control(left_speed:u32, right_speed:u32) {
@@ -129,12 +130,12 @@ fn calculate(x:i32 , y:i32) -> [u32; 2] {
 
 //left and right wheel
     if quarter == 1 || quarter == 4 {
-        left = y * sin_angle;
-        right = y; 
+        left = y; 
+        right = y * sin_angle;
 
     } else if quarter == 2 || quarter == 3 {
-        left = y;
-        right = y * sin_angle; 
+        left = y * sin_angle; 
+        right = y; 
     }
 
     let mut speed:[u32; 2] = [left, right];
