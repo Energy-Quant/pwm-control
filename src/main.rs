@@ -62,10 +62,10 @@ fn control(left_speed:u32, right_speed:u32) {
 
     // Define Starting Position
     driver_1
-        .set_duty(map(left_speed, 0, 180, min_limit, max_limit))
+        .set_duty(map(left_speed, 0, 180, min_limit_1, max_limit_1))
         .unwrap();
     driver_2
-        .set_duty(map(right_speed, 0, 180, min_limit, max_limit))
+        .set_duty(map(right_speed, 0, 180, min_limit_2, max_limit_2))
         .unwrap();
 
 }
