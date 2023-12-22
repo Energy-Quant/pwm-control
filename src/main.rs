@@ -1,14 +1,9 @@
 use channel_reader::{CaptureTimer, ChannelReader};
 use esp_idf_hal::delay::FreeRtos;
-use esp_idf_hal::delay::FreeRtos;
 use esp_idf_hal::ledc::{config::TimerConfig, LedcDriver, LedcTimerDriver, Resolution};
 use esp_idf_hal::peripherals::Peripherals;
 use esp_idf_hal::prelude::*;
 
-const VESC_PIN_1:i8 = 6;
-const VESC_PIN_2:i8 = 7;
-const X_INPUT:i8 = 4;
-const Y_INPUT:i8 = 5;
 
 fn main() {
     // It is necessary to call this function once. Otherwise some patches to the runtime
@@ -30,6 +25,9 @@ fn control(left_speed:u32, right_speed:u32) {
     // Take Peripherals
     let peripherals = Peripherals::take().unwrap();
 
+    let vesc_pin_1 = peripherals.pins.gpio6;
+    let vesc_pin_2 = peripherals.pins.gpio7;
+
     // Configure and Initialize LEDC Timer Driver
     let timer_driver = LedcTimerDriver::new(
         peripherals.ledc.timer0,
@@ -42,14 +40,14 @@ fn control(left_speed:u32, right_speed:u32) {
     let mut driver_1 = LedcDriver::new(
         peripherals.ledc.channel0,
         timer_driver,
-        peripherals.pins.VESC_PIN_1,
+        peripherals.pins.vesc_pin_1,
     )
     .unwrap();
       // Configure and Initialize LEDC Driver
     let mut driver_2 = LedcDriver::new(
         peripherals.ledc.channel0,
         timer_driver,
-        peripherals.pins.VESC_PIN_2,
+        peripherals.pins.vesc_pin_2,
     )
     .unwrap();
 
@@ -82,10 +80,16 @@ fn map(x: u32, in_min: u32, in_max: u32, out_min: u32, out_max: u32) -> u32 {
 
 
 fn reading() -> [i64; 2] {
+
+    let peripherals = Peripherals::take().unwrap();
+
     let capture_timer = CaptureTimer::new(0).unwrap();
 
-    let channel1 = ChannelReader::new(&capture_timer, X_INPUT).unwrap();
-    let channel2 = ChannelReader::new(&capture_timer, Y_INPUT).unwrap();
+    let x_input = peripherals.pins.gpio4;
+    let y_input = peripherals.pins.gpio5;
+
+    let channel1 = ChannelReader::new(&capture_timer, x_input).unwrap();
+    let channel2 = ChannelReader::new(&capture_timer, y_input).unwrap();
     let readings:[i64; 2] = [channel1.get_value(), channel2.get_value()];
     return readings;
 }
